@@ -1,47 +1,51 @@
-# 🛍️ Tienda Django — CRUD de Productos
+# Tienda Django — CRUD de Productos
 
-Sistema web de gestión de productos desarrollado con Django y MySQL. Permite administrar un catálogo de productos con operaciones completas de creación, lectura, actualización y eliminación desde una interfaz moderna y responsiva.
+Sistema web de gestión de productos desarrollado con Django y SQLite. Permite administrar un catálogo de productos con operaciones completas de creación, lectura, actualización y eliminación desde una interfaz moderna y responsiva.
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+## Tecnologías utilizadas
 
 | Capa | Tecnología |
 |---|---|
-| Backend | Python 3.11 + Django 4.x |
-| Base de datos | MySQL 8.x |
+| Backend | Python 3.x + Django 6.0 |
+| Base de datos | SQLite 3 (default) / MySQL 8.x (opcional) |
 | ORM | Django ORM |
 | Frontend | HTML5 + Tailwind CSS (CDN) |
-| Subida de archivos | Django + Pillow |
 | Panel de administración | Django Admin |
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
-- **Listar productos** — vista en tarjetas con imagen, precio y stock
+- **Listar productos** — vista en tarjetas con precio y stock
 - **Crear producto** — formulario con validación del lado del servidor
 - **Editar producto** — formulario prellenado con los datos actuales
 - **Eliminar producto** — soft delete (se marca como inactivo, no se borra físicamente)
-- **Búsqueda** — filtrado por nombre o descripción en tiempo real
+- **Búsqueda** — filtrado por nombre o descripción
 - **Paginación** — 10 productos por página
 - **Categorías** — relación ForeignKey con modelo Categoria
-- **Subida de imágenes** — imagen opcional por producto
 - **Mensajes de confirmación** — notificaciones de éxito y error tras cada acción
 - **Panel de administración** — gestión avanzada desde `/admin/`
 
 ---
 
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 tienda/
 ├── manage.py
+├── seed_data.py
+├── db.sqlite3
+├── requirements.txt
 ├── tienda/
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py
 ├── productos/
+│   ├── management/
+│   │   └── commands/
+│   │       └── seed_data.py
 │   ├── migrations/
 │   ├── templates/
 │   │   └── productos/
@@ -54,16 +58,13 @@ tienda/
 │   ├── models.py
 │   ├── urls.py
 │   └── views.py
-├── templates/
-│   └── base.html
-├── media/
-│   └── productos/
-└── requirements.txt
+└── templates/
+    └── base.html
 ```
 
 ---
 
-## ⚙️ Instrucciones para ejecutar el proyecto
+## Instrucciones para ejecutar el proyecto
 
 ### 1. Clonar el repositorio
 
@@ -75,13 +76,12 @@ cd tienda-django
 ### 2. Crear y activar el entorno virtual
 
 ```bash
-# Crear entorno virtual
 python -m venv venv
 
-# Activar en Linux / macOS
+# macOS / Linux
 source venv/bin/activate
 
-# Activar en Windows
+# Windows
 venv\Scripts\activate
 ```
 
@@ -91,25 +91,42 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Contenido de `requirements.txt`:
+### 4. Aplicar migraciones
 
-```
-django>=4.2
-mysqlclient>=2.1
-pillow>=10.0
+```bash
+python manage.py migrate
 ```
 
-### 4. Crear la base de datos en MySQL
+### 5. Cargar datos de prueba
 
-Conéctate a MySQL y ejecuta:
-
-```sql
-CREATE DATABASE tienda_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```bash
+python manage.py seed_data
 ```
 
-### 5. Configurar la conexión a la base de datos
+Esto crea 5 categorías (Electrónica, Ropa, Hogar, Deportes, Alimentos) y 12 productos de ejemplo.
 
-Edita `tienda/settings.py` con tus credenciales:
+### 6. Crear un superusuario (para el panel admin)
+
+```bash
+python manage.py createsuperuser
+```
+
+### 7. Ejecutar el servidor de desarrollo
+
+```bash
+python manage.py runserver
+```
+
+La aplicación estará disponible en:
+
+- **Productos:** http://localhost:8000/
+- **Admin:** http://localhost:8000/admin/
+
+---
+
+## Base de datos alternativa (MySQL)
+
+Por defecto el proyecto usa SQLite. Para usar MySQL, edita `tienda/settings.py` y reemplaza el bloque `DATABASES`:
 
 ```python
 DATABASES = {
@@ -124,33 +141,15 @@ DATABASES = {
 }
 ```
 
-### 6. Aplicar migraciones
+Luego crea la base de datos en MySQL:
 
-```bash
-python manage.py makemigrations
-python manage.py migrate
+```sql
+CREATE DATABASE tienda_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-
-### 7. Crear un superusuario (para el panel admin)
-
-```bash
-python manage.py createsuperuser
-```
-
-### 8. Ejecutar el servidor de desarrollo
-
-```bash
-python manage.py runserver
-```
-
-La aplicación estará disponible en:
-
-- **Productos:** http://localhost:8000/productos/
-- **Admin:** http://localhost:8000/admin/
 
 ---
 
-## 🗄️ Modelo de datos
+## Modelo de datos
 
 ### Producto
 
@@ -162,7 +161,6 @@ La aplicación estará disponible en:
 | `precio` | DecimalField | Precio con 2 decimales |
 | `stock` | PositiveIntegerField | Unidades disponibles |
 | `categoria` | ForeignKey | Relación con Categoria |
-| `imagen` | ImageField | Foto del producto (opcional) |
 | `activo` | BooleanField | Soft delete flag |
 | `creado_en` | DateTimeField | Fecha de creación automática |
 
@@ -175,16 +173,13 @@ La aplicación estará disponible en:
 
 ---
 
-## 🔗 Rutas disponibles
+## Rutas disponibles
 
 | Método | URL | Acción |
 |---|---|---|
-| GET | `/productos/` | Listar todos los productos |
+| GET | `/` | Redirige a la lista de productos |
+| GET | `/productos/` | Listar todos los productos activos |
 | GET | `/productos/<id>/` | Ver detalle de un producto |
 | GET / POST | `/productos/nuevo/` | Crear un nuevo producto |
 | GET / POST | `/productos/<id>/editar/` | Editar un producto existente |
 | GET / POST | `/productos/<id>/eliminar/` | Confirmar y eliminar producto |
-
----
-
-
