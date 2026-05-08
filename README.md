@@ -16,18 +16,6 @@ Sistema web de gestión de productos desarrollado con Django y SQLite. Permite a
 
 ---
 
-## Funcionalidades
-
-- **Listar productos** — vista en tarjetas con precio y stock
-- **Crear producto** — formulario con validación del lado del servidor
-- **Editar producto** — formulario prellenado con los datos actuales
-- **Eliminar producto** — soft delete (se marca como inactivo, no se borra físicamente)
-- **Búsqueda** — filtrado por nombre o descripción
-- **Paginación** — 10 productos por página
-- **Categorías** — relación ForeignKey con modelo Categoria
-- **Mensajes de confirmación** — notificaciones de éxito y error tras cada acción
-- **Panel de administración** — gestión avanzada desde `/admin/`
-
 ---
 
 ## Estructura del proyecto
